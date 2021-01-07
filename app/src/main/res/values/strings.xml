@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">CoverScan</string>
+    <string-array name="options">
+        <item>Couverture</item>
+        <item>Sénescence</item>
+    </string-array>
+</resources>
