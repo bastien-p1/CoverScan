@@ -21,9 +21,13 @@ import com.bastien.scan.R;
 
 public class MainActivity extends AppCompatActivity {
 
-    String scan_mode;
+    //create a list to iterate trough the values of the pixels
+    short[] it = new short[]{0,1,2};
+    //creating a placeholder for the threshold values
+    float[][] th = new float[3][2];
+    //creating a response code for the activity
     static final int REQUEST_IMAGE_CAPTURE = 100;
-    float MaskValue = 109/100;//define the green level determining the vegetal covering of the surface
+    //creating a global variable to contain the value of the covering
     float covering;
 
     @Override
@@ -36,8 +40,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //start the entire process chain
-                Spinner mode = findViewById(R.id.scan_modes);
-                scan_mode = String.valueOf(mode.getSelectedItem());
                 capturePhoto();
             }
         });
@@ -51,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         } catch (ActivityNotFoundException e) {
             // display error state to the user
-            Log.e("fail", "capturePhoto: capture failed");
+            Log.i("fail", "capturePhoto: capture failed");
         }
     }
 
@@ -70,25 +72,37 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+
+    boolean ApplyThreshold(float[] px){
+        for(short i: it){
+            if(th[i][0] > px[i] || th[i][1] < px[i]){
+                //if the value of the selected chanel of the pixel is outside the range (two values) of the same chanel of the threshold, we return false
+                return(false);
+            }
+        }
+        return(true);//if all the chanel are in the desired range (false hasn't been returned), we return true
+    }
     
     @RequiresApi(api = Build.VERSION_CODES.R)
     public void cover(Bitmap arr){
-        //perform a colormask to :
+        //perform a color mask to :
         //1: get the area occupied by green color on the image
         //2: get a black and white image of the original image masked
         int arrHeight = arr.getHeight();
         int arrWidth = arr.getWidth();
-        int ckPx = 0;
+        int ckPx = 0;//checked pixels
 
         for(int he = 0; he < arrHeight; he++){
             for(int wi = 0; wi < arrWidth; wi++){
-                //TODO: refactor this part using HSV color comparison or functional comparison
-                int c = arr.getPixel(wi,he);
-                int red = Color.red(c);
-                int green = Color.green(c);
-                int blue = Color.blue(c);
-                int Avr = (red+green+blue)/3;
-                if(!(Avr == 0) && ((green/Avr) > MaskValue)){
+                int rgb = arr.getPixel(wi,he);
+                float[] hsv = new float[3];
+                int red = Color.red(rgb);
+                int green = Color.green(rgb);
+                int blue = Color.blue(rgb);
+                Color.RGBToHSV(red,green,blue,hsv);
+                boolean isInThreshold = ApplyThreshold(hsv);
+
+                if(isInThreshold){
                     //create color for the pixel
                     int color = Color.argb(255,0,0,0);
                     //put this color in the corresponding pixel on the masked image
@@ -106,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         covering = (ckPx*100)/(arrHeight*arrWidth);
         //display the covering ratio we got :
         TextView coveringDisplay = findViewById(R.id.coveringDisplay);
-        String display = "couverture : "+ Float.toString(covering) + "%";
+        String display = "couverture : "+ covering + "%";
         Log.d("result", display);
         coveringDisplay.setText(display);
         //then display the masked Image :
