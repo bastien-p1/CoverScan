@@ -1,7 +1,9 @@
 package com.bastien.coverscan;
 
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
@@ -21,10 +23,13 @@ import com.bastien.scan.R;
 
 public class MainActivity extends AppCompatActivity {
 
-    //create a list to iterate trough the values of the pixels
-    short[] it = new short[]{0,1,2};
-    //creating a placeholder for the threshold values
-    float[][] th = new float[3][2];
+    //creating a default for the threshold values
+    SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
+    float[] def = new float[]{70,170};
+    float th_hight = sharedPref.getFloat("threshold_hight",def[0]);
+    float th_low = sharedPref.getFloat("threshold_low",def[1]);
+    float[] th = new float[]{th_low,th_hight};
+
     //creating a response code for the activity
     static final int REQUEST_IMAGE_CAPTURE = 100;
     //creating a global variable to contain the value of the covering
@@ -41,6 +46,17 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //start the entire process chain
                 capturePhoto();
+            }
+        });
+
+        Button bt2 = findViewById(R.id.mask);
+        bt2.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.R)
+            @Override
+            public void onClick(View v) {
+                //switch to color mask parameters view
+                Intent switchActivityIntent = new Intent(MainActivity.this, ColorMaskActivity.class);
+                startActivity(switchActivityIntent);
             }
         });
     }
@@ -73,15 +89,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    boolean ApplyThreshold(float[] px){
-        for(short i: it){
-            if(th[i][0] > px[i] || th[i][1] < px[i]){
-                //if the value of the selected chanel of the pixel is outside the range (two values) of the same chanel of the threshold, we return false
-                return(false);
-            }
-        }
-        return(true);//if all the chanel are in the desired range (false hasn't been returned), we return true
-    }
     
     @RequiresApi(api = Build.VERSION_CODES.R)
     public void cover(Bitmap arr){
@@ -100,7 +107,8 @@ public class MainActivity extends AppCompatActivity {
                 int green = Color.green(rgb);
                 int blue = Color.blue(rgb);
                 Color.RGBToHSV(red,green,blue,hsv);
-                boolean isInThreshold = ApplyThreshold(hsv);
+                float hue = hsv[0];
+                boolean isInThreshold = (hue > th[0] && hue < th[1]);
 
                 if(isInThreshold){
                     //create color for the pixel
