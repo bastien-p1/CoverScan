@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
@@ -24,11 +23,12 @@ import com.bastien.scan.R;
 public class MainActivity extends AppCompatActivity {
 
     //creating a default for the threshold values
-    SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
-    float[] def = new float[]{70,170};
-    float th_hight = sharedPref.getFloat("threshold_hight",def[0]);
-    float th_low = sharedPref.getFloat("threshold_low",def[1]);
-    float[] th = new float[]{th_low,th_hight};
+    SharedPreferences sharedPref;
+    float[] def;
+    float th_high;
+    float th_low;
+    boolean inversion;
+    float[] th;
 
     //creating a response code for the activity
     static final int REQUEST_IMAGE_CAPTURE = 100;
@@ -39,6 +39,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
+        def = new float[]{70,170};
+        th_high = sharedPref.getFloat("threshold_high",def[0]);
+        th_low = sharedPref.getFloat("threshold_low",def[1]);
+        inversion = sharedPref.getBoolean("isInverted",false);
+        th = new float[]{th_low, th_high};
+
         Button bt1 = findViewById(R.id.TakePictureButton);
         bt1.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.R)
@@ -84,14 +92,15 @@ public class MainActivity extends AppCompatActivity {
             Bitmap byteImg = (Bitmap) extras.get("data");
 
             //process the picture :
-            cover(byteImg);
+            cover(byteImg, inversion);
 
         }
     }
 
     
     @RequiresApi(api = Build.VERSION_CODES.R)
-    public void cover(Bitmap arr){
+    public void cover(Bitmap arr, boolean isInverted){
+        //Todo fix that shit
         //perform a color mask to :
         //1: get the area occupied by green color on the image
         //2: get a black and white image of the original image masked
@@ -108,7 +117,13 @@ public class MainActivity extends AppCompatActivity {
                 int blue = Color.blue(rgb);
                 Color.RGBToHSV(red,green,blue,hsv);
                 float hue = hsv[0];
-                boolean isInThreshold = (hue > th[0] && hue < th[1]);
+
+                boolean isInThreshold;
+                if(isInverted){
+                    isInThreshold = (hue > th[0] || hue < th[1]);
+                }else{
+                    isInThreshold = (hue > th[0] && hue < th[1]);
+                }
 
                 if(isInThreshold){
                     //create color for the pixel

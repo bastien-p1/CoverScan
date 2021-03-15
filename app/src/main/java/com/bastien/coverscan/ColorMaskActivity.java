@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -22,17 +23,28 @@ import java.util.Collections;
 import java.util.List;
 
 public class ColorMaskActivity extends AppCompatActivity {
-    SharedPreferences sharedPref = ColorMaskActivity.this.getPreferences(Context.MODE_PRIVATE);
-    SharedPreferences.Editor editor = sharedPref.edit();
-    float[] def = new float[]{70,170};
-    float th_hight = sharedPref.getFloat("threshold_hight",def[0]);
-    float th_low = sharedPref.getFloat("threshold_low",def[1]);
-    float[] th = new float[]{th_low,th_hight};
+    SharedPreferences sharedPref;
+    SharedPreferences.Editor editor;
+    float[] def;
+    float th_high;
+    float th_low;
+    boolean inversion;
+    float[] th;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_color_mask);
+        //Todo setup rangeslider variables from backend
+        //Todo reset view
+
+        sharedPref = ColorMaskActivity.this.getPreferences(Context.MODE_PRIVATE);
+        editor = sharedPref.edit();
+        def = new float[]{70,170};
+        th_high = sharedPref.getFloat("threshold_high",def[0]);
+        th_low = sharedPref.getFloat("threshold_low",def[1]);
+        inversion = sharedPref.getBoolean("isInverted",false);
+        th = new float[]{th_low, th_high};
 
         Button bt1 = findViewById(R.id.Abort);
         bt1.setOnClickListener(new View.OnClickListener() {
@@ -55,13 +67,11 @@ public class ColorMaskActivity extends AppCompatActivity {
                 int colorClear = Color.argb(0,0,0,0);
                 int colorMasked = Color.argb(180,0,0,0);
 
-                maskDisplay(wheel, colorClear, colorMasked);
-
-                returnToMain();
+                maskDisplay(wheel, colorClear, colorMasked, inversion);
             }
         });
 
-        Button bt3 = findViewById(R.id.Abort);
+        Button bt3 = findViewById(R.id.Validate);
         bt3.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.R)
             @Override
@@ -94,22 +104,20 @@ public class ColorMaskActivity extends AppCompatActivity {
             upper = 360+upper;
         }
 
-        float[] th = new float[]{lower,upper};
+        boolean isInverted = (lower > upper);
 
-        editor.putFloat("threshold_hight",upper);
+        editor.putFloat("threshold_high",upper);
         editor.putFloat("threshold_low",lower);
+        editor.putBoolean("isInverted",isInverted);
 
         editor.apply();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.R)
-    public void maskDisplay(Bitmap arr, int clear, int masked){
-        //perform a color mask to :
-        //1: get the area occupied by green color on the image
-        //2: get a black and white image of the original image masked
+    public void maskDisplay(Bitmap Iarr, int clear, int masked, boolean isInverted){
+        Bitmap arr = Iarr.copy(Bitmap.Config.ARGB_8888, true);
         int arrHeight = arr.getHeight();
         int arrWidth = arr.getWidth();
-        int ckPx = 0;//checked pixels
 
         for(int he = 0; he < arrHeight; he++){
             for(int wi = 0; wi < arrWidth; wi++){
@@ -120,7 +128,13 @@ public class ColorMaskActivity extends AppCompatActivity {
                 int blue = Color.blue(rgb);
                 Color.RGBToHSV(red,green,blue,hsv);
                 float hue = hsv[0];
-                boolean isInThreshold = (hue > th[0] && hue < th[1]);
+
+                boolean isInThreshold;
+                if(isInverted){
+                    isInThreshold = (hue > th[0] || hue < th[1]);
+                }else{
+                    isInThreshold = (hue > th[0] && hue < th[1]);
+                }
 
                 if(isInThreshold){
                     //put the clear color in the corresponding pixel on the masked image
