@@ -23,6 +23,7 @@
         android:layout_height="84dp"
         android:layout_marginTop="548dp"
         android:text="couverture : 0%"
+        android:textSize="30sp"
         app:layout_constraintBottom_toTopOf="@+id/TakePictureButton"
         app:layout_constraintDimensionRatio="5:1"
         app:layout_constraintEnd_toEndOf="parent"
@@ -31,13 +32,13 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-    <Spinner
-        android:id="@+id/scan_modes"
+    <Button
+        android:id="@+id/mask"
         android:layout_width="198dp"
         android:layout_height="81dp"
         android:layout_marginTop="548dp"
         android:layout_marginBottom="1dp"
-        android:entries="@array/options"
+        android:text="Masque"
         app:layout_constraintBottom_toTopOf="@+id/TakePictureButton"
         app:layout_constraintDimensionRatio="5:1"
         app:layout_constraintEnd_toEndOf="parent"
