@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import com.bastien.scan.R;
 import com.google.android.material.slider.RangeSlider;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,25 +27,26 @@ public class ColorMaskActivity extends AppCompatActivity {
     SharedPreferences sharedPref;
     SharedPreferences.Editor editor;
     float[] def;
-    float th_high;
-    float th_low;
-    boolean inversion;
-    float[] th;
+    float upper;
+    float lower;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_color_mask);
-        //Todo setup rangeslider variables from backend
-        //Todo reset view
 
-        sharedPref = ColorMaskActivity.this.getPreferences(Context.MODE_PRIVATE);
+        sharedPref = ColorMaskActivity.this.getSharedPreferences("Values",Context.MODE_PRIVATE);
         editor = sharedPref.edit();
         def = new float[]{70,170};
-        th_high = sharedPref.getFloat("threshold_high",def[0]);
-        th_low = sharedPref.getFloat("threshold_low",def[1]);
-        inversion = sharedPref.getBoolean("isInverted",false);
-        th = new float[]{th_low, th_high};
+        lower = sharedPref.getFloat("threshold_low",def[0]);
+        upper = sharedPref.getFloat("threshold_high",def[1]);
+
+        List<Float> values = new ArrayList<>();
+        values.add(lower);
+        values.add(upper);
+
+        RangeSlider sliderInit = findViewById(R.id.ColorRange);
+        sliderInit.setValues(values);
 
         Button bt1 = findViewById(R.id.Abort);
         bt1.setOnClickListener(new View.OnClickListener() {
@@ -67,7 +69,7 @@ public class ColorMaskActivity extends AppCompatActivity {
                 int colorClear = Color.argb(0,0,0,0);
                 int colorMasked = Color.argb(180,0,0,0);
 
-                maskDisplay(wheel, colorClear, colorMasked, inversion);
+                maskDisplay(wheel, colorClear, colorMasked);
             }
         });
 
@@ -89,13 +91,23 @@ public class ColorMaskActivity extends AppCompatActivity {
     }
 
     public void setRangeValues(){
-        float upper = 0;
-        float lower = 0;
 
         RangeSlider slider = findViewById(R.id.ColorRange);
         List<Float> values = slider.getValues();
         lower = Collections.min(values);
         upper = Collections.max(values);
+
+        editor.putFloat("threshold_high",upper);
+        editor.putFloat("threshold_low",lower);
+
+        editor.commit();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.R)
+    public void maskDisplay(Bitmap Iarr, int clear, int masked){
+        Bitmap arr = Iarr.copy(Bitmap.Config.ARGB_8888, true);
+        int arrHeight = arr.getHeight();
+        int arrWidth = arr.getWidth();
 
         if(lower < 0){
             lower = 360+lower;
@@ -103,21 +115,7 @@ public class ColorMaskActivity extends AppCompatActivity {
         if(upper < 0){
             upper = 360+upper;
         }
-
         boolean isInverted = (lower > upper);
-
-        editor.putFloat("threshold_high",upper);
-        editor.putFloat("threshold_low",lower);
-        editor.putBoolean("isInverted",isInverted);
-
-        editor.apply();
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.R)
-    public void maskDisplay(Bitmap Iarr, int clear, int masked, boolean isInverted){
-        Bitmap arr = Iarr.copy(Bitmap.Config.ARGB_8888, true);
-        int arrHeight = arr.getHeight();
-        int arrWidth = arr.getWidth();
 
         for(int he = 0; he < arrHeight; he++){
             for(int wi = 0; wi < arrWidth; wi++){
@@ -131,9 +129,9 @@ public class ColorMaskActivity extends AppCompatActivity {
 
                 boolean isInThreshold;
                 if(isInverted){
-                    isInThreshold = (hue > th[0] || hue < th[1]);
+                    isInThreshold = (hue > lower || hue < upper);
                 }else{
-                    isInThreshold = (hue > th[0] && hue < th[1]);
+                    isInThreshold = (hue > lower && hue < upper);
                 }
 
                 if(isInThreshold){

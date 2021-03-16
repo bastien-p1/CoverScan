@@ -25,10 +25,8 @@ public class MainActivity extends AppCompatActivity {
     //creating a default for the threshold values
     SharedPreferences sharedPref;
     float[] def;
-    float th_high;
-    float th_low;
-    boolean inversion;
-    float[] th;
+    float upper;
+    float lower;
 
     //creating a response code for the activity
     static final int REQUEST_IMAGE_CAPTURE = 100;
@@ -40,12 +38,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
+        sharedPref = MainActivity.this.getSharedPreferences("Values",Context.MODE_PRIVATE);
         def = new float[]{70,170};
-        th_high = sharedPref.getFloat("threshold_high",def[0]);
-        th_low = sharedPref.getFloat("threshold_low",def[1]);
-        inversion = sharedPref.getBoolean("isInverted",false);
-        th = new float[]{th_low, th_high};
+        lower = sharedPref.getFloat("threshold_low",def[0]);
+        upper = sharedPref.getFloat("threshold_high",def[1]);
 
         Button bt1 = findViewById(R.id.TakePictureButton);
         bt1.setOnClickListener(new View.OnClickListener() {
@@ -77,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         } catch (ActivityNotFoundException e) {
             // display error state to the user
-            Log.i("fail", "capturePhoto: capture failed");
+            Log.e("fail", "capturePhoto: capture failed");
         }
     }
 
@@ -92,21 +88,31 @@ public class MainActivity extends AppCompatActivity {
             Bitmap byteImg = (Bitmap) extras.get("data");
 
             //process the picture :
-            cover(byteImg, inversion);
+            cover(byteImg);
 
         }
     }
 
     
     @RequiresApi(api = Build.VERSION_CODES.R)
-    public void cover(Bitmap arr, boolean isInverted){
-        //Todo fix that shit
+    public void cover(Bitmap arr){
         //perform a color mask to :
         //1: get the area occupied by green color on the image
         //2: get a black and white image of the original image masked
         int arrHeight = arr.getHeight();
         int arrWidth = arr.getWidth();
         int ckPx = 0;//checked pixels
+        
+        if(lower < 0){
+            lower = 360+lower;
+        }
+        if(upper < 0){
+            upper = 360+upper;
+        }
+        boolean isInverted = (lower > upper);
+
+        Log.d("DBSHI", "setRangeValues: "+sharedPref.getFloat("threshold_low",1000));
+        Log.d("DBSHI", "setRangeValues: "+sharedPref.getFloat("threshold_high",1000));
 
         for(int he = 0; he < arrHeight; he++){
             for(int wi = 0; wi < arrWidth; wi++){
@@ -120,9 +126,9 @@ public class MainActivity extends AppCompatActivity {
 
                 boolean isInThreshold;
                 if(isInverted){
-                    isInThreshold = (hue > th[0] || hue < th[1]);
+                    isInThreshold = (hue > lower || hue < upper);
                 }else{
-                    isInThreshold = (hue > th[0] && hue < th[1]);
+                    isInThreshold = (hue > lower && hue < upper);
                 }
 
                 if(isInThreshold){
