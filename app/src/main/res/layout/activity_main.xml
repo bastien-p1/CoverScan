@@ -7,57 +7,72 @@
     android:layout_height="match_parent"
     tools:context="com.bastien.coverscan.MainActivity">
 
+
     <ImageView
         android:id="@+id/maskedDisplay"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/coveringDisplay"
+        android:layout_marginStart="32dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginRight="32dp"
+        android:layout_marginBottom="330dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="3:4"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/coveringDisplay"
-        android:layout_width="210dp"
-        android:layout_height="84dp"
-        android:layout_marginTop="548dp"
-        android:text="couverture : 0%"
-        android:textSize="30sp"
-        app:layout_constraintBottom_toTopOf="@+id/TakePictureButton"
-        app:layout_constraintDimensionRatio="5:1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-
-    <Button
-        android:id="@+id/mask"
-        android:layout_width="198dp"
-        android:layout_height="81dp"
-        android:layout_marginTop="548dp"
-        android:layout_marginBottom="1dp"
-        android:text="Masque"
-        app:layout_constraintBottom_toTopOf="@+id/TakePictureButton"
-        app:layout_constraintDimensionRatio="5:1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.967"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/clover_icon" />
 
     <Button
         android:id="@+id/TakePictureButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_alignParentBottom="true"
-        android:layout_marginTop="628dp"
-        android:text="prendre une photo"
+        android:layout_marginStart="32dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="160dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginRight="32dp"
+        android:layout_marginBottom="32dp"
+        android:text="Prendre une Photo"
+        android:textSize="26sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintDimensionRatio="4:1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/maskedDisplay" />
+
+    <TextView
+        android:id="@+id/coveringDisplay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginRight="32dp"
+        android:layout_marginBottom="32dp"
+        android:text="Couverture : 0%"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/TakePictureButton"
+        app:layout_constraintEnd_toStartOf="@+id/mask"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/maskedDisplay" />
+
+    <Button
+        android:id="@+id/mask"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginRight="32dp"
+        android:layout_marginBottom="32dp"
+        android:text="Button"
+        app:layout_constraintBottom_toTopOf="@+id/TakePictureButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/coveringDisplay"
+        app:layout_constraintTop_toBottomOf="@+id/maskedDisplay" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

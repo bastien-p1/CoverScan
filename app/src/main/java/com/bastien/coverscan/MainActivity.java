@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
@@ -26,14 +25,15 @@ public class MainActivity extends AppCompatActivity {
     //creating a default for the threshold values
     SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
     float[] def = new float[]{70,170};
-    float th_hight = sharedPref.getFloat("threshold_hight",def[0]);
+    float th_high = sharedPref.getFloat("threshold_hight",def[0]);
     float th_low = sharedPref.getFloat("threshold_low",def[1]);
-    float[] th = new float[]{th_low,th_hight};
+    float[] th = new float[]{th_low, th_high};
 
     //creating a response code for the activity
     static final int REQUEST_IMAGE_CAPTURE = 100;
     //creating a global variable to contain the value of the covering
     float covering;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -54,15 +54,18 @@ public class MainActivity extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.R)
             @Override
             public void onClick(View v) {
-                //switch to color mask parameters view
-                Intent switchActivityIntent = new Intent(MainActivity.this, ColorMaskActivity.class);
-                startActivity(switchActivityIntent);
+                switchActivity();
             }
         });
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.R)
+    public void switchActivity(){
+        //switch to color mask parameters view
+        Intent switchActivityIntent = new Intent(MainActivity.this, ColorMaskActivity.class);
+        startActivity(switchActivityIntent);
+    }
 
+    @RequiresApi(api = Build.VERSION_CODES.R)
     private void capturePhoto() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         try {
