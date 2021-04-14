@@ -22,7 +22,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/Validate"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/palette" />
+        app:layout_constraintTop_toBottomOf="@+id/scrollView" />
 
     <Button
         android:id="@+id/Validate"
@@ -38,10 +38,10 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/Display"
-        app:layout_constraintTop_toBottomOf="@+id/palette" />
+        app:layout_constraintTop_toBottomOf="@+id/scrollView" />
 
     <ScrollView
-        android:id="@+id/palette"
+        android:id="@+id/scrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
@@ -57,24 +57,10 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TableLayout
+            android:id="@+id/palette"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
         </TableLayout>
 
     </ScrollView>
